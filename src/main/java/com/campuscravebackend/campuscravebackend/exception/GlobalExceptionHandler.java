@@ -67,4 +67,13 @@ public class GlobalExceptionHandler {
                         "error", ex.getMessage()
                 ));
     }
+
+    @ExceptionHandler(ImageUploadFailure.class)
+    public ResponseEntity<?> imageUploadFailure (ImageUploadFailure ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", ex.getMessage()
+                ));
+    }
 }

@@ -5,10 +5,10 @@ import com.campuscravebackend.campuscravebackend.entity.Listing;
 import com.campuscravebackend.campuscravebackend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.List;
+
 
 
 public interface ListingRepository extends JpaRepository<Listing, Long> {
-
+    List<Listing> findBySellerUsername(String username);
 }

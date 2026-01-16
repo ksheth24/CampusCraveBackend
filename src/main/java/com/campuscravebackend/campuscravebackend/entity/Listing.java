@@ -37,6 +37,7 @@ public class Listing {
     @Column(nullable = false, name = "pickupLoc")
     private String pickupLoc;
 
-    @Column(nullable = false, name = "sellerId")
-    private Long sellerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sellerId") // 👈 maps to column
+    private User seller;
 }
