@@ -59,7 +59,8 @@ public class ListingService {
                         l.getId(),
                         l.getTitle(),
                         l.getPrice(),
-                        l.getPickupLoc()
+                        l.getPickupLoc(),
+                        l.getPhotoUrl()
         )).toList();
     }
 
@@ -74,7 +75,8 @@ public class ListingService {
                         l.getId(),
                         l.getTitle(),
                         l.getPrice(),
-                        l.getPickupLoc()
+                        l.getPickupLoc(),
+                        l.getPhotoUrl()
                 )).toList();
     }
 
@@ -86,7 +88,8 @@ public class ListingService {
                         l.getDescription(),
                         l.getIngredients(),
                         l.getPrice(),
-                        l.getPickupLoc()
+                        l.getPickupLoc(),
+                        l.getPhotoUrl()
                 )).orElseThrow();
     }
 

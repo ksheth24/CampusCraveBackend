@@ -2,9 +2,8 @@ package com.campuscravebackend.campuscravebackend.controller;
 
 import com.campuscravebackend.campuscravebackend.entity.User;
 import com.campuscravebackend.campuscravebackend.security.JwtUtil;
-import com.campuscravebackend.campuscravebackend.service.RegisterService;
-import jakarta.persistence.GeneratedValue;
-import org.apache.coyote.Response;
+import com.campuscravebackend.campuscravebackend.service.EmailService;
+import com.campuscravebackend.campuscravebackend.service.AuthenticationService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -15,16 +14,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/api/auth")
-public class RegisterController {
-    private final RegisterService registerService;
+public class AuthenticationController {
+    private final AuthenticationService authenticationService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    public RegisterController(RegisterService registerService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
-        this.registerService = registerService;
+    public AuthenticationController(AuthenticationService authenticationService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+        this.authenticationService = authenticationService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
@@ -35,9 +35,11 @@ public class RegisterController {
 
     public record VerifyEmailRequest(String email) {}
 
+    public record VerificationCompare(String email, String code) {}
+
     @PostMapping("/register")
     public User register(@RequestBody RegisterRequest request) {
-        return registerService.registerService(request.username, request.email, request.password, request.passwordConfirm);
+        return authenticationService.registerService(request.username, request.email, request.password, request.passwordConfirm);
     }
 
     @PostMapping("/login")
@@ -78,10 +80,15 @@ public class RegisterController {
     }
 
 
-//    @PostMapping("/verifyEmail")
-//    public void verifyEmail(@RequestBody VerifyEmailRequest request) {
-//        registerService.sendVerificationEmail(request.email());
-//    }
+    @PostMapping("/sendVerificationEmail")
+    public void sendVerificationEmail(@RequestBody VerifyEmailRequest request) {
+        authenticationService.sendVerificationEmail(request.email);
+    }
+
+    @PostMapping("/verifyEmail")
+    public void verifyEmail(@RequestBody VerificationCompare request) {
+        authenticationService.verifyEmail(request.email, request.code);
+    }
 
     @GetMapping("/check")
     public ResponseEntity<?> check(Authentication authentication) {

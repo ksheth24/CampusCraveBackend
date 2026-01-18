@@ -34,4 +34,7 @@ public class User {
 
     @Column(nullable = false, name = "verifiedSeller")
     private boolean verifiedSeller;
+
+    @Column(name = "verificationHash")
+    private boolean verificationHash;
 }
