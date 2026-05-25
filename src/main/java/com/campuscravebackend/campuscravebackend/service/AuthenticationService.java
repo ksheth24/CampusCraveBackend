@@ -2,10 +2,7 @@ package com.campuscravebackend.campuscravebackend.service;
 
 
 import com.campuscravebackend.campuscravebackend.entity.User;
-import com.campuscravebackend.campuscravebackend.exception.EmailAlreadyExists;
-import com.campuscravebackend.campuscravebackend.exception.InvalidLoginCredentials;
-import com.campuscravebackend.campuscravebackend.exception.PasswordsDontMatch;
-import com.campuscravebackend.campuscravebackend.exception.UserNameAlreadyExists;
+import com.campuscravebackend.campuscravebackend.exception.*;
 import com.campuscravebackend.campuscravebackend.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,7 +36,7 @@ public class AuthenticationService {
         user.setUsername(username);
         user.setEmailId(email);
         user.setPasswordHash(encoder.encode(passwordRaw));
-        user.setAccountVerified(true);
+        user.setAccountVerified(false);
         user.setVerifiedSeller(true);
         return userRepository.save(user);
     }
@@ -87,11 +84,17 @@ public class AuthenticationService {
                 htmlBody);
 
         User user = userRepository.findByEmailId(email).orElseThrow(() ->  new InvalidLoginCredentials("Invalid Login Credentials!"));
-        user.setVerificationHash(verificationCode);
+        user.setVerificationHash(encoder.encode(verificationCode));
+        userRepository.save(user);
     }
 
     public void verifyEmail(String email, String code) {
         User user = userRepository.findByEmailId(email).orElseThrow(() ->  new InvalidLoginCredentials("Invalid Login Credentials!"));
-        user.setVerificationHash(verificationCode);
+        boolean verified = encoder.matches(code, user.getVerificationHash());
+        if (verified) {
+            user.setAccountVerified(true);
+        } else {
+            throw new InvalidEmailVerification("Invalid Email Verification Code");
+        }
     }
 }

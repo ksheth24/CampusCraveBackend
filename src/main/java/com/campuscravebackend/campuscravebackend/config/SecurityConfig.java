@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(List.of("http://localhost:3000"));
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(List.of("*"));
                     config.setAllowCredentials(true);
                     return config;
@@ -44,8 +44,8 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/listing/getListings", "/api/listing/get/{id}", "/api/auth/verifyEmail").permitAll()
-                        .requestMatchers("/api/auth/check", "/api/user/getEmail", "/api/listing/create").authenticated()
+                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/listing/getListings", "/api/listing/get/{id}", "/api/auth/verifyEmail", "/api/auth/sendVerificationEmail").permitAll()
+                        .requestMatchers("/api/auth/check", "/api/user/getEmail", "/api/listing/create", "/api/reservation/**").authenticated()
                         .anyRequest().permitAll()
                 )
 

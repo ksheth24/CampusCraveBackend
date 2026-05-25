@@ -4,10 +4,13 @@ import com.campuscravebackend.campuscravebackend.controller.ListingController;
 import com.campuscravebackend.campuscravebackend.dto.ListingInfo;
 import com.campuscravebackend.campuscravebackend.dto.ListingPreview;
 import com.campuscravebackend.campuscravebackend.entity.Listing;
+import com.campuscravebackend.campuscravebackend.entity.Reservation;
+import com.campuscravebackend.campuscravebackend.entity.ReservationStatus;
 import com.campuscravebackend.campuscravebackend.entity.User;
 import com.campuscravebackend.campuscravebackend.exception.InvalidLoginCredentials;
 import com.campuscravebackend.campuscravebackend.exception.NotAuthenticated;
 import com.campuscravebackend.campuscravebackend.repository.ListingRepository;
+import com.campuscravebackend.campuscravebackend.repository.ReservationRepository;
 import com.campuscravebackend.campuscravebackend.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +25,22 @@ import java.util.Map;
 
 @Service
 public class ListingService {
+    private static final List<ReservationStatus> ACTIVE_RESERVATION_STATUSES = List.of(
+            ReservationStatus.RESERVED,
+            ReservationStatus.CONFIRMED,
+            ReservationStatus.PREPARING,
+            ReservationStatus.READY_FOR_PICKUP
+    );
+
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
+    private final ReservationRepository reservationRepository;
     private final CloudinaryService cloudinaryService;
 
-    public ListingService(ListingRepository listingRepository, UserRepository userRepository, CloudinaryService cloudinaryService) {
+    public ListingService(ListingRepository listingRepository, UserRepository userRepository, ReservationRepository reservationRepository, CloudinaryService cloudinaryService) {
         this.listingRepository = listingRepository;
         this.userRepository = userRepository;
+        this.reservationRepository = reservationRepository;
         this.cloudinaryService = cloudinaryService;
     }
 
@@ -53,14 +65,16 @@ public class ListingService {
     }
 
     public List<ListingPreview> getListings() {
-        return listingRepository.findAll()
+        return listingRepository.findAllUnreserved(ACTIVE_RESERVATION_STATUSES)
                 .stream()
                 .map(l -> new ListingPreview(
                         l.getId(),
                         l.getTitle(),
                         l.getPrice(),
                         l.getPickupLoc(),
-                        l.getPhotoUrl()
+                        l.getPhotoUrl(),
+                        l.getPhotoUrl(),
+                        false
         )).toList();
     }
 
@@ -76,21 +90,31 @@ public class ListingService {
                         l.getTitle(),
                         l.getPrice(),
                         l.getPickupLoc(),
-                        l.getPhotoUrl()
+                        l.getPhotoUrl(),
+                        l.getPhotoUrl(),
+                        reservationRepository.existsByListingIdAndStatusIn(l.getId(), ACTIVE_RESERVATION_STATUSES)
                 )).toList();
     }
 
     public ListingInfo getListingInfo(Long listingId) {
         return listingRepository.findById(listingId)
-                .map(l -> new ListingInfo(
-                        l.getId(),
-                        l.getTitle(),
-                        l.getDescription(),
-                        l.getIngredients(),
-                        l.getPrice(),
-                        l.getPickupLoc(),
-                        l.getPhotoUrl()
-                )).orElseThrow();
+                .map(l -> {
+                    Reservation reservation = reservationRepository
+                            .findByListingIdAndStatusIn(l.getId(), ACTIVE_RESERVATION_STATUSES)
+                            .orElse(null);
+
+                    return new ListingInfo(
+                            l.getId(),
+                            l.getTitle(),
+                            l.getDescription(),
+                            l.getIngredients(),
+                            l.getPrice(),
+                            l.getPickupLoc(),
+                            l.getPhotoUrl(),
+                            reservation != null,
+                            reservation == null ? null : reservation.getId()
+                    );
+                }).orElseThrow();
     }
 
 

@@ -76,4 +76,31 @@ public class GlobalExceptionHandler {
                         "error", ex.getMessage()
                 ));
     }
+
+    @ExceptionHandler(InvalidEmailVerification.class)
+    public ResponseEntity<?> invalidEmailVerification (InvalidEmailVerification ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ListingAlreadyReserved.class)
+    public ResponseEntity<?> listingAlreadyReserved (ListingAlreadyReserved ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ReservationNotAllowed.class)
+    public ResponseEntity<?> reservationNotAllowed (ReservationNotAllowed ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", ex.getMessage()
+                ));
+    }
 }

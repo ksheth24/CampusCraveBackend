@@ -36,5 +36,5 @@ public class User {
     private boolean verifiedSeller;
 
     @Column(name = "verificationHash")
-    private boolean verificationHash;
+    private String verificationHash;
 }
